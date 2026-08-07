@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>ROW Swim Club — 2026-27 Season Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0B2C4A;
+    --aqua:#17B8C4;
+    --deep:#0F4C63;
+    --surface:#EDF3F5;
+    --card:#FFFFFF;
+    --slate:#5A7183;
+    --line:#D5E0E5;
+    --display:"Archivo","Arial Narrow",Arial,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--surface);
+    color:var(--navy);
+    font-family:var(--body);
+    font-size:17px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    padding:24px 16px 56px;
+  }
+
+  .wrap{max-width:520px;margin:0 auto;}
+
+  /* --- masthead --- */
+  .club{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:13px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--deep);
+    margin:0 0 10px;
+  }
+  /* signature: swim lane rope */
+  .rope{
+    height:12px;
+    border-radius:6px;
+    margin-bottom:26px;
+    background:
+      repeating-linear-gradient(90deg,
+        var(--aqua) 0 14px,
+        var(--navy) 14px 28px);
+    box-shadow:inset 0 -2px 0 rgba(0,0,0,.14);
+  }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:28px 24px 26px;
+    box-shadow:0 1px 2px rgba(11,44,74,.05);
+  }
+
+  h1{
+    font-family:var(--display);
+    font-weight:800;
+    font-size:30px;
+    line-height:1.15;
+    margin:0 0 6px;
+    letter-spacing:-.01em;
+  }
+  .sub{margin:0 0 22px;color:var(--slate);font-size:16px;}
+
+  .swimmer{
+    background:var(--surface);
+    border-left:5px solid var(--aqua);
+    border-radius:0 8px 8px 0;
+    padding:12px 16px;
+    margin:0 0 24px;
+  }
+  .swimmer .lbl{
+    display:block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--slate);font-weight:600;margin-bottom:2px;
+  }
+  .swimmer .val{font-family:var(--display);font-weight:600;font-size:22px;display:block;}
+  .swimmer .grp{display:block;font-size:15px;color:var(--slate);margin-top:3px;}
+
+  .q{font-weight:600;font-size:18px;margin:0 0 14px;}
+
+  fieldset{border:0;margin:0 0 22px;padding:0;}
+  legend{padding:0;}
+
+  .opt{display:block;margin-bottom:10px;position:relative;}
+  .opt input{
+    position:absolute;opacity:0;width:1px;height:1px;
+  }
+  .opt span{
+    display:block;
+    border:2px solid var(--line);
+    border-radius:10px;
+    padding:15px 18px;
+    font-size:18px;
+    font-weight:600;
+    cursor:pointer;
+    background:#fff;
+    transition:border-color .12s ease, background .12s ease;
+  }
+  .opt span small{display:block;font-weight:400;font-size:14px;color:var(--slate);margin-top:2px;}
+  .opt input:hover + span{border-color:var(--aqua);}
+  .opt input:focus-visible + span{outline:3px solid var(--deep);outline-offset:2px;}
+  .opt input:checked + span{border-color:var(--deep);background:#E8F6F8;}
+
+  label.note{display:block;font-weight:600;font-size:15px;margin:0 0 6px;}
+  textarea{
+    width:100%;font-family:var(--body);font-size:16px;
+    border:2px solid var(--line);border-radius:10px;padding:11px 12px;
+    min-height:78px;resize:vertical;color:var(--navy);background:#fff;
+  }
+  textarea:focus{outline:none;border-color:var(--aqua);}
+
+  button.send{
+    width:100%;margin-top:22px;
+    font-family:var(--display);font-weight:800;font-size:18px;letter-spacing:.02em;
+    background:var(--deep);color:#fff;border:0;border-radius:10px;
+    padding:16px;cursor:pointer;
+  }
+  button.send:hover{background:var(--navy);}
+  button.send:focus-visible{outline:3px solid var(--aqua);outline-offset:2px;}
+  button.send[disabled]{background:var(--slate);cursor:default;}
+
+  .err{color:#A32020;font-weight:600;font-size:15px;margin-top:12px;display:none;}
+
+  .foot{margin:22px 4px 0;font-size:14px;color:var(--slate);}
+  .foot a{color:var(--deep);}
+
+  .done .tick{
+    width:54px;height:54px;border-radius:50%;
+    background:var(--aqua);color:#fff;
+    font-size:30px;line-height:54px;text-align:center;
+    margin:0 0 16px;font-weight:700;
+  }
+  .hidden{display:none;}
+  iframe.sink{display:none;}
+
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="club">ROW Swim Club</p>
+  <div class="rope" aria-hidden="true"></div>
+
+  <!-- ============ FORM ============ -->
+  <div class="card" id="formCard">
+    <h1>Returning for 2026-27?</h1>
+    <p class="sub">We are checking our records so we can place every swimmer in the right group.</p>
+
+    <div class="swimmer">
+      <span class="lbl">Swimmer</span>
+      <span class="val" id="swimmerName">Your swimmer</span>
+      <span class="grp" id="swimmerGroup"></span>
+    </div>
+
+    <form id="replyForm" action="https://script.google.com/macros/s/AKfycbw8U1_rpE1wMHTgxM0hAxqMhCjeXPH9OfwZ2mvpBby2CYff8dO41YEAxp6yP0NFXGAP/exec" method="POST" target="sink">
+      <input type="hidden" name="token" id="token" value="">
+      <input type="hidden" name="swimmer" id="swimmerField" value="">
+      <input type="hidden" name="group" id="groupField" value="">
+      <input type="hidden" name="page" value="row-return-2627">
+
+      <fieldset>
+        <legend class="q">Will this swimmer be back for 2026-27?</legend>
+
+        <label class="opt">
+          <input type="radio" name="answer" value="Yes" required>
+          <span>Yes<small>This swimmer is coming back</small></span>
+        </label>
+
+        <label class="opt">
+          <input type="radio" name="answer" value="No">
+          <span>No<small>This swimmer is not coming back</small></span>
+        </label>
+
+      </fieldset>
+
+      <label class="note" for="notes">Notes or comments (optional)</label>
+      <textarea id="notes" name="notes" maxlength="500"></textarea>
+
+      <button type="submit" class="send" id="sendBtn">Send my answer</button>
+      <p class="err" id="err">Please pick one answer above.</p>
+    </form>
+  </div>
+
+  <!-- ============ THANK YOU ============ -->
+  <div class="card done hidden" id="doneCard">
+    <div class="tick" aria-hidden="true">&#10003;</div>
+    <h1>Thank you</h1>
+    <p class="sub" id="doneMsg">Your answer is recorded. There is nothing else to do.</p>
+    <p class="foot" style="margin-left:0">Changed your mind? Just open this link again and send a new answer.</p>
+  </div>
+
+  <!-- ============ BAD LINK ============ -->
+  <div class="card hidden" id="badCard">
+    <h1>This link is not complete</h1>
+    <p class="sub">Please open the link straight from our email, without editing it. If it still will not work, email us and we will sort it out.</p>
+    <p class="foot" style="margin-left:0"><a href="mailto:gm@rowswimming.ca">gm@rowswimming.ca</a></p>
+  </div>
+
+  <p class="foot">Questions? Email <a href="mailto:gm@rowswimming.ca">gm@rowswimming.ca</a></p>
+</div>
+
+<iframe name="sink" class="sink" title="submit target"></iframe>
+
+<script>
+(function(){
+  var p = new URLSearchParams(window.location.search);
+  var t = (p.get('t') || '').trim();
+  var nm = (p.get('n') || '').trim();
+  var gp = (p.get('g') || '').trim();
+
+  if (!t) {
+    document.getElementById('formCard').classList.add('hidden');
+    document.getElementById('badCard').classList.remove('hidden');
+    return;
+  }
+
+  document.getElementById('token').value = t;
+  if (nm) {
+    document.getElementById('swimmerName').textContent = nm;
+    document.getElementById('swimmerField').value = nm;
+  }
+  if (gp) {
+    document.getElementById('swimmerGroup').textContent = 'Our records show: ' + gp;
+    document.getElementById('groupField').value = gp;
+  }
+
+  var form = document.getElementById('replyForm');
+  var btn  = document.getElementById('sendBtn');
+  var err  = document.getElementById('err');
+
+  form.addEventListener('submit', function(e){
+    var picked = form.querySelector('input[name="answer"]:checked');
+    if (!picked) { e.preventDefault(); err.style.display = 'block'; return; }
+    err.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = 'Sending\u2026';
+    // The POST goes to the hidden iframe, so the page never navigates away.
+    setTimeout(function(){
+      document.getElementById('formCard').classList.add('hidden');
+      var d = document.getElementById('doneCard');
+      d.classList.remove('hidden');
+      if (picked.value === 'No') {
+        document.getElementById('doneMsg').textContent =
+          'Your answer is recorded. We are sorry to see you go, and we hope to swim with you again.';
+      }
+      window.scrollTo(0,0);
+    }, 700);
+  });
+})();
+</script>
+</body>
+</html>
