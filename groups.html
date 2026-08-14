@@ -316,7 +316,7 @@
    Leave a pair of empty quote marks and no link will show for that group.
    The names on the left must match your spreadsheet exactly.
    ===================================================================== */
-var PROGRAM_PAGES = {
+var DEFAULT_PAGES = {
   "Age Group Development 1 (AGD1)": "https://www.rowswimming.ca/page/programs/age-group-development-1",
   "Age Group Development 2 (AGD2)": "https://www.rowswimming.ca/page/programs/age-group-development-2",
   "Junior Development 1 (JD1)": "https://www.rowswimming.ca/page/programs/junior-development-1",
@@ -360,7 +360,7 @@ var WELCOME = {
   "quote": "We're excited to welcome you to the 2026-27 swimming season! I'm excited to see your progress over the year ahead!"
 };
 
-var SCHEDULES = {
+var DEFAULT_SCHEDULES = {
   "TOPS 1": [
     "Monday, Wednesday and Friday, 7:00 to 8:00 pm at Cameron Heights",
     "Tuesday 7:00 to 8:00 pm, Wednesday 6:00 to 7:00 pm, Thursday 5:30 to 6:30 pm at WLU"
@@ -369,7 +369,8 @@ var SCHEDULES = {
     "Monday and Wednesday, 7:00 to 8:00 pm at Cameron Heights",
     "Wednesday and Friday, 7:00 to 8:00 pm at Cameron Heights",
     "Monday and Friday, 7:00 to 8:00 pm at Cameron Heights",
-    "Tuesday 7:00 to 8:00 pm and Thursday 6:30 to 7:30 pm at WLU"
+    "Tuesday and Thursday, 5:30 to 6:30 pm at WLU",
+    "Tuesday 7:30 to 8:30 pm and Thursday 7:00 to 8:00 pm at WLU"
   ],
   "Recreation": [
     "Monday, Wednesday and Friday, 8:00 to 9:00 pm at Cameron Heights",
@@ -377,7 +378,40 @@ var SCHEDULES = {
   ]
 };
 
-(function(){
+/* =====================================================================
+   SETTINGS
+   The page asks the spreadsheet for the current program links and
+   schedules when it loads. If that does not answer within a few seconds,
+   it uses the copies above instead, so the form always works.
+   ===================================================================== */
+var PROGRAM_PAGES = DEFAULT_PAGES;
+var SCHEDULES = DEFAULT_SCHEDULES;
+
+var CONFIG_URL = document.getElementById('replyForm').getAttribute('action') + '?config=1';
+
+function loadSettings(done){
+  var finished = false;
+  function finish(){ if (!finished) { finished = true; done(); } }
+
+  var timer = setTimeout(finish, 4000);   // never wait longer than this
+
+  try {
+    fetch(CONFIG_URL, { method: 'GET' })
+      .then(function(r){ return r.json(); })
+      .then(function(cfg){
+        if (cfg && cfg.pages && Object.keys(cfg.pages).length) PROGRAM_PAGES = cfg.pages;
+        if (cfg && cfg.schedules && Object.keys(cfg.schedules).length) SCHEDULES = cfg.schedules;
+      })
+      .catch(function(){ /* keep the built in copies */ })
+      .then(function(){ clearTimeout(timer); finish(); });
+  } catch (e) {
+    clearTimeout(timer); finish();
+  }
+}
+
+loadSettings(function(){ startForm(); });
+
+function startForm(){
   var p = new URLSearchParams(window.location.search);
   var t = (p.get('t') || '').trim();
   var nm = (p.get('n') || '').trim();
@@ -716,7 +750,7 @@ var SCHEDULES = {
       window.scrollTo(0,0);
     }, 700);
   });
-})();
+}
 </script>
 </body>
 </html>
