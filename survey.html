@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>ROW Swim Club — Survey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0B2C4A; --aqua:#17B8C4; --deep:#0F4C63;
+    --surface:#EDF3F5; --card:#FFFFFF; --slate:#5A7183; --line:#D5E0E5;
+    --display:"Archivo","Arial Narrow",Arial,sans-serif;
+    --body:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--surface);color:var(--navy);font-family:var(--body);
+       font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased;
+       padding:24px 16px 56px;}
+  .wrap{max-width:540px;margin:0 auto;}
+  .club{font-family:var(--display);font-weight:800;font-size:13px;letter-spacing:.18em;
+        text-transform:uppercase;color:var(--deep);margin:0 0 10px;}
+  .rope{height:12px;border-radius:6px;margin-bottom:26px;
+        background:repeating-linear-gradient(90deg,var(--aqua) 0 14px,var(--navy) 14px 28px);
+        box-shadow:inset 0 -2px 0 rgba(0,0,0,.14);}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+        padding:28px 24px 26px;box-shadow:0 1px 2px rgba(11,44,74,.05);}
+  h1{font-family:var(--display);font-weight:800;font-size:28px;line-height:1.15;
+     margin:0 0 6px;letter-spacing:-.01em;}
+  .sub{margin:0;color:var(--slate);font-size:16px;}
+  .swimmer{background:var(--surface);border-left:5px solid var(--aqua);
+           border-radius:0 8px 8px 0;padding:12px 16px;margin:20px 0 0;}
+  .swimmer .lbl{display:block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+                color:var(--slate);font-weight:600;margin-bottom:2px;}
+  .swimmer .val{display:block;font-family:var(--display);font-weight:600;font-size:21px;}
+  .step{border-top:1px solid var(--line);margin-top:26px;padding-top:24px;}
+  .q{font-weight:600;font-size:18px;margin:0 0 8px;line-height:1.45;}
+  .rule{display:inline-block;margin-left:8px;vertical-align:2px;font-size:12px;
+        font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:#E8F6F8;
+        color:var(--deep);border-radius:20px;padding:4px 10px;white-space:nowrap;}
+  .rule.opt-tag{background:var(--surface);color:var(--slate);}
+  .why{margin:0 0 14px;color:var(--slate);font-size:15px;}
+  fieldset{border:0;margin:0;padding:0;}
+  legend{padding:0;}
+  .opt{display:block;margin-bottom:10px;position:relative;}
+  .opt input{position:absolute;opacity:0;width:1px;height:1px;}
+  .opt span.box{display:block;border:2px solid var(--line);border-radius:10px;
+       padding:14px 16px;font-size:17px;font-weight:600;cursor:pointer;background:#fff;
+       transition:border-color .12s ease, background .12s ease;}
+  .opt input:hover + span.box{border-color:var(--aqua);}
+  .opt input:focus-visible + span.box{outline:3px solid var(--deep);outline-offset:2px;}
+  .opt input:checked + span.box{border-color:var(--deep);background:#E8F6F8;}
+  input[type=text],input[type=number],textarea{
+    width:100%;font-family:var(--body);font-size:16px;border:2px solid var(--line);
+    border-radius:10px;padding:11px 12px;color:var(--navy);background:#fff;}
+  textarea{min-height:88px;resize:vertical;}
+  input:focus,textarea:focus{outline:none;border-color:var(--aqua);}
+  button.send{width:100%;margin-top:26px;font-family:var(--display);font-weight:800;
+    font-size:18px;letter-spacing:.02em;background:var(--deep);color:#fff;border:0;
+    border-radius:10px;padding:16px;cursor:pointer;}
+  button.send:hover{background:var(--navy);}
+  button.send:focus-visible{outline:3px solid var(--aqua);outline-offset:2px;}
+  button.send[disabled]{background:var(--slate);cursor:default;}
+  .err{color:#A32020;font-weight:600;font-size:15px;margin-top:12px;display:none;}
+  .foot{margin:22px 4px 0;font-size:14px;color:var(--slate);}
+  .foot a{color:var(--deep);}
+  .tick{width:54px;height:54px;border-radius:50%;background:var(--aqua);color:#fff;
+        font-size:30px;line-height:54px;text-align:center;margin:0 0 16px;font-weight:700;}
+  .hidden{display:none;}
+  iframe.sink{display:none;}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="club">ROW Swim Club</p>
+  <div class="rope" aria-hidden="true"></div>
+
+  <div class="card" id="loadCard">
+    <p class="sub">Loading the questions&hellip;</p>
+  </div>
+
+  <div class="card hidden" id="formCard">
+    <h1 id="title">Survey</h1>
+    <p class="sub" id="intro"></p>
+    <div class="swimmer hidden" id="swimmerBox">
+      <span class="lbl">Swimmer</span>
+      <span class="val" id="swimmerName"></span>
+    </div>
+    <form id="surveyForm" method="POST" target="sink">
+      <input type="hidden" name="page"    value="survey">
+      <input type="hidden" name="token"   id="token" value="">
+      <input type="hidden" name="swimmer" id="swimmerField" value="">
+      <div id="questions"></div>
+      <button type="submit" class="send" id="sendBtn">Send my answers</button>
+      <p class="err" id="err"></p>
+    </form>
+  </div>
+
+  <div class="card hidden" id="doneCard">
+    <div class="tick" aria-hidden="true">&#10003;</div>
+    <h1>Thank you</h1>
+    <p class="sub" id="doneMsg">Your answers are recorded. There is nothing else to do.</p>
+  </div>
+
+  <div class="card hidden" id="badCard">
+    <h1>This link is not complete</h1>
+    <p class="sub">Please open the link straight from our email, without editing it. If it still will not work, email us and we will sort it out.</p>
+  </div>
+
+  <div class="card hidden" id="shutCard">
+    <h1>This survey has closed</h1>
+    <p class="sub" id="shutMsg">Thank you to everyone who answered.</p>
+  </div>
+
+  <p class="foot">Questions? Email <a href="mailto:gm@rowswimming.ca">gm@rowswimming.ca</a></p>
+</div>
+
+<iframe name="sink" class="sink" title="submit target"></iframe>
+
+<script>
+/* =====================================================================
+   THE ONLY SETTING IN THIS FILE.
+   The questions and all the wording come from the Survey Questions and
+   Survey Settings tabs of the spreadsheet.
+   ===================================================================== */
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzevpwNa2SoWSWbRq3UJvqgVPi_rPDKIyfIOpXcbSefw9gkK0FVFo3kKp6txV9P499vlQ/exec';
+
+document.getElementById('surveyForm').setAttribute('action', SCRIPT_URL);
+
+(function(){
+  var p = new URLSearchParams(window.location.search);
+  var code = (p.get('t') || '').trim();
+  var nm   = (p.get('n') || '').trim();
+  var QUESTIONS = [];
+
+  function show(id){
+    ['loadCard','formCard','doneCard','badCard','shutCard'].forEach(function(c){
+      document.getElementById(c).classList.toggle('hidden', c !== id);
+    });
+  }
+  function esc(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  if (!code) { show('badCard'); return; }
+  document.getElementById('token').value = code;
+  if (nm) {
+    document.getElementById('swimmerName').textContent = nm;
+    document.getElementById('swimmerField').value = nm;
+    document.getElementById('swimmerBox').classList.remove('hidden');
+  }
+
+  /* ---- ask the spreadsheet what to ask ---- */
+  var timer = setTimeout(function(){ show('badCard'); }, 8000);
+
+  window.rowSurvey = function(def){
+    clearTimeout(timer);
+    try { build(def); } catch (e) { show('badCard'); }
+  };
+
+  var tag = document.createElement('script');
+  tag.src = SCRIPT_URL + '?survey=1&callback=rowSurvey&t=' + Date.now();
+  tag.onerror = function(){ clearTimeout(timer); show('badCard'); };
+  document.head.appendChild(tag);
+
+  /* ---- draw the questions ---- */
+  function build(def){
+    var s = (def && def.settings) ? def.settings : {};
+    QUESTIONS = (def && def.questions) ? def.questions : [];
+
+    if (String(s['Open'] || 'Yes').trim().toLowerCase().charAt(0) === 'n') {
+      if (s['Closed message']) document.getElementById('shutMsg').textContent = s['Closed message'];
+      show('shutCard');
+      return;
+    }
+    if (!QUESTIONS.length) { show('badCard'); return; }
+
+    document.getElementById('title').textContent = s['Title'] || 'Survey';
+    document.getElementById('intro').textContent = s['Intro'] || '';
+    if (s['Thank you']) document.getElementById('doneMsg').textContent = s['Thank you'];
+
+    var html = '';
+    QUESTIONS.forEach(function(q, i){
+      var type = String(q.type || '').toLowerCase();
+      var many = (type.indexOf('several') > -1 || type.indexOf('multi') > -1);
+      var isYesNo = (type.indexOf('yes') > -1);
+      var choice = many || isYesNo || type.indexOf('choice') > -1;
+
+      var tag = choice ? (many ? '<span class="rule">Pick one or more</span>'
+                               : '<span class="rule">Pick one</span>') : '';
+      if (!q.required) tag += '<span class="rule opt-tag">Optional</span>';
+
+      html += '<div class="step"><fieldset>';
+      html += '<legend class="q">' + esc(q.text) + tag + '</legend>';
+      if (q.help) html += '<p class="why">' + esc(q.help) + '</p>';
+
+      var opts = q.options || [];
+      if (isYesNo && !opts.length) opts = ['Yes', 'No'];
+
+      if (choice && opts.length) {
+        opts.forEach(function(o){
+          html += '<label class="opt"><input type="' + (many ? 'checkbox' : 'radio') +
+                  '" name="a' + i + '" value="' + esc(o) + '">' +
+                  '<span class="box">' + esc(o) + '</span></label>';
+        });
+      } else if (type.indexOf('number') > -1) {
+        html += '<input type="number" name="a' + i + '" inputmode="numeric">';
+      } else if (type.indexOf('short') > -1) {
+        html += '<input type="text" name="a' + i + '" maxlength="200">';
+      } else {
+        html += '<textarea name="a' + i + '" maxlength="1200"></textarea>';
+      }
+      html += '</fieldset></div>';
+    });
+
+    document.getElementById('questions').innerHTML = html;
+    show('formCard');
+  }
+
+  /* ---- send ---- */
+  var form = document.getElementById('surveyForm');
+  var btn  = document.getElementById('sendBtn');
+  var err  = document.getElementById('err');
+
+  form.addEventListener('change', function(){ err.style.display = 'none'; });
+  form.addEventListener('input',  function(){ err.style.display = 'none'; });
+
+  form.addEventListener('submit', function(e){
+    var answers = [];
+
+    for (var i = 0; i < QUESTIONS.length; i++) {
+      var q = QUESTIONS[i];
+      var picked = [];
+      var fields = form.querySelectorAll('[name="a' + i + '"]');
+      for (var k = 0; k < fields.length; k++) {
+        var el = fields[k];
+        if (el.type === 'radio' || el.type === 'checkbox') {
+          if (el.checked) picked.push(el.value);
+        } else if (String(el.value).trim()) {
+          picked.push(String(el.value).trim());
+        }
+      }
+      if (q.required && !picked.length) {
+        e.preventDefault();
+        err.textContent = 'Please answer: ' + q.text;
+        err.style.display = 'block';
+        return;
+      }
+      answers.push(picked.join(' | '));
+    }
+
+    answers.forEach(function(v, i){
+      var f = document.createElement('input');
+      f.type = 'hidden';
+      f.name = 'q' + i;
+      f.value = v;
+      form.appendChild(f);
+    });
+
+    err.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = 'Sending\u2026';
+    setTimeout(function(){ show('doneCard'); window.scrollTo(0, 0); }, 700);
+  });
+})();
+</script>
+</body>
+</html>
