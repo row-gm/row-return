@@ -387,26 +387,40 @@ var DEFAULT_SCHEDULES = {
 var PROGRAM_PAGES = DEFAULT_PAGES;
 var SCHEDULES = DEFAULT_SCHEDULES;
 
-var CONFIG_URL = document.getElementById('replyForm').getAttribute('action') + '?config=1';
+var CONFIG_URL = document.getElementById('replyForm').getAttribute('action');
 
+/**
+ * Asks the spreadsheet for the current program links and schedules.
+ *
+ * It loads the answer as a script rather than fetching it, because
+ * browsers will not let a page read a Google Apps Script reply any other
+ * way. If nothing comes back within a few seconds, the copies built into
+ * this page are used instead and the form carries on as normal.
+ */
 function loadSettings(done){
   var finished = false;
-  function finish(){ if (!finished) { finished = true; done(); } }
-
-  var timer = setTimeout(finish, 4000);   // never wait longer than this
-
-  try {
-    fetch(CONFIG_URL, { method: 'GET' })
-      .then(function(r){ return r.json(); })
-      .then(function(cfg){
-        if (cfg && cfg.pages && Object.keys(cfg.pages).length) PROGRAM_PAGES = cfg.pages;
-        if (cfg && cfg.schedules && Object.keys(cfg.schedules).length) SCHEDULES = cfg.schedules;
-      })
-      .catch(function(){ /* keep the built in copies */ })
-      .then(function(){ clearTimeout(timer); finish(); });
-  } catch (e) {
-    clearTimeout(timer); finish();
+  function finish(){
+    if (finished) return;
+    finished = true;
+    try { delete window.rowSettings; } catch (e) { window.rowSettings = null; }
+    done();
   }
+
+  var timer = setTimeout(finish, 5000);
+
+  window.rowSettings = function(cfg){
+    try {
+      if (cfg && cfg.pages && Object.keys(cfg.pages).length) PROGRAM_PAGES = cfg.pages;
+      if (cfg && cfg.schedules && Object.keys(cfg.schedules).length) SCHEDULES = cfg.schedules;
+    } catch (e) { /* keep the built in copies */ }
+    clearTimeout(timer);
+    finish();
+  };
+
+  var tag = document.createElement('script');
+  tag.src = CONFIG_URL + '?config=1&callback=rowSettings&t=' + Date.now();
+  tag.onerror = function(){ clearTimeout(timer); finish(); };
+  document.head.appendChild(tag);
 }
 
 loadSettings(function(){ startForm(); });
