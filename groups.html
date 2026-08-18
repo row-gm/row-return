@@ -164,6 +164,11 @@
 <body>
 <div class="wrap">
 
+  <div class="pv hidden" id="blockBar" style="background:#FDECEC;border-color:#E2A1A1">
+    <p style="color:#8A2222">Your email app is blocking part of this page, so your answer may not save.</p>
+    <p style="color:#8A2222;font-weight:400;margin:0">Please copy the address at the top of this page and open it in Chrome or Safari instead. If that is difficult, email <a href="mailto:gm@rowswimming.ca">gm@rowswimming.ca</a> and we will record your answer for you.</p>
+  </div>
+
   <div class="pv hidden" id="previewBar">
     <p>Preview mode. You are opening this file from your computer, so no answers are saved.</p>
     <a href="?t=g7543d87&amp;n=Parnia%20A.&amp;g1=Senior%20Development%20%28SD%29">One group</a>
@@ -446,7 +451,10 @@ function loadSettings(done){
   attempt();
 }
 
-loadSettings(function(){ startForm(); });
+loadSettings(function(){
+  if (!SETTINGS_OK) document.getElementById('blockBar').classList.remove('hidden');
+  startForm();
+});
 
 function startForm(){
   var p = new URLSearchParams(window.location.search);
@@ -799,30 +807,61 @@ function startForm(){
     btn.disabled = true;
     btn.textContent = 'Sending\u2026';
 
-    /* The answer is posted into a hidden frame. If that frame never
-       finishes loading, the answer did not reach us, so say so rather
-       than showing a thank you that is not true. */
+    /* Send it in a way we get a straight answer back from. A normal form
+       send tells us nothing, because a blocked send looks the same as a
+       successful one. This way the club's script replies, so we only say
+       thank you when the answer really has been saved. */
+    e.preventDefault();
+
     var landed = false;
-    var sink = document.getElementsByName('sink')[0];
+    var attempts = 0;
 
-    function arrived(){
+    var payload = {
+      submit: '1',
+      token: form.token.value,
+      swimmer: form.swimmer.value,
+      offered: form.offered.value,
+      returning: ret.value,
+      choice1: (form.querySelector('input[name="choice1"]:checked') || {}).value || '',
+      choice2: (form.querySelector('input[name="choice2"]:checked') || {}).value || '',
+      schedules: document.getElementById('schedField').value,
+      schedules2: document.getElementById('schedField2').value,
+      comments: document.getElementById('comments').value.slice(0, 600)
+    };
+
+    window.rowSaved = function(res){
       if (landed) return;
       landed = true;
-      buildDone(ret.value, form.querySelector('input[name="choice1"]:checked'), ticked);
-      document.getElementById('formCard').classList.add('hidden');
-      document.getElementById('doneCard').classList.remove('hidden');
+      if (res && res.saved) {
+        buildDone(ret.value, form.querySelector('input[name="choice1"]:checked'), ticked);
+        document.getElementById('formCard').classList.add('hidden');
+        document.getElementById('doneCard').classList.remove('hidden');
+      } else {
+        document.getElementById('formCard').classList.add('hidden');
+        document.getElementById('failCard').classList.remove('hidden');
+      }
       window.scrollTo(0,0);
+    };
+
+    function send(){
+      attempts++;
+      var q = ['callback=rowSaved'];
+      for (var k in payload) q.push(k + '=' + encodeURIComponent(payload[k]));
+      var tag = document.createElement('script');
+      tag.src = CONFIG_URL + '?' + q.join('&') + '&z=' + Date.now();
+      tag.onerror = function(){ if (attempts < 2) send(); };
+      document.head.appendChild(tag);
+
+      setTimeout(function(){
+        if (landed) return;
+        if (attempts < 2) { send(); return; }
+        landed = true;
+        document.getElementById('formCard').classList.add('hidden');
+        document.getElementById('failCard').classList.remove('hidden');
+        window.scrollTo(0,0);
+      }, 9000);
     }
-
-    if (sink) sink.addEventListener('load', function(){ setTimeout(arrived, 300); });
-
-    setTimeout(function(){
-      if (landed) return;
-      landed = true;
-      document.getElementById('formCard').classList.add('hidden');
-      document.getElementById('failCard').classList.remove('hidden');
-      window.scrollTo(0,0);
-    }, 12000);
+    send();
   });
 }
 </script>
