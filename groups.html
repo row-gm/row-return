@@ -299,6 +299,18 @@
   </div>
 
   <!-- ============ BAD LINK ============ -->
+  <div class="card hidden" id="failCard">
+    <h1>We could not save your answer</h1>
+    <p class="sub">Your phone or email app blocked it. Nothing has been recorded, so please try one of these.</p>
+    <div class="step">
+      <p class="q" style="font-size:16px">Open the link in a normal browser</p>
+      <p class="why">Copy the address at the top of this page, then paste it into Chrome or Safari and answer again. This fixes it almost every time.</p>
+      <p class="q" style="font-size:16px">Or just email us</p>
+      <p class="why">Send your answer to <a href="mailto:gm@rowswimming.ca">gm@rowswimming.ca</a> and we will record it for you.</p>
+    </div>
+    <button type="button" class="send" id="retryBtn">Try again</button>
+  </div>
+
   <div class="card hidden" id="badCard">
     <h1>This link is not complete</h1>
     <p class="sub">Please open the link straight from our email, without editing it. If it still will not work, email us and we will sort it out.</p>
@@ -398,30 +410,40 @@ var CONFIG_URL = document.getElementById('replyForm').getAttribute('action');
  * way. If nothing comes back within a few seconds, the copies built into
  * this page are used instead and the form carries on as normal.
  */
+var SETTINGS_OK = false;
+
 function loadSettings(done){
   var finished = false;
+  var tries = 0;
+
   function finish(){
     if (finished) return;
     finished = true;
-    try { delete window.rowSettings; } catch (e) { window.rowSettings = null; }
     done();
   }
-
-  var timer = setTimeout(finish, 5000);
 
   window.rowSettings = function(cfg){
     try {
       if (cfg && cfg.pages && Object.keys(cfg.pages).length) PROGRAM_PAGES = cfg.pages;
-      if (cfg && cfg.schedules && Object.keys(cfg.schedules).length) SCHEDULES = cfg.schedules;
+      if (cfg && cfg.schedules) { SCHEDULES = cfg.schedules; SETTINGS_OK = true; }
     } catch (e) { /* keep the built in copies */ }
-    clearTimeout(timer);
     finish();
   };
 
-  var tag = document.createElement('script');
-  tag.src = CONFIG_URL + '?config=1&callback=rowSettings&t=' + Date.now();
-  tag.onerror = function(){ clearTimeout(timer); finish(); };
-  document.head.appendChild(tag);
+  /* Some phone email apps open links in a cut down browser that blocks
+     this. Try twice, then carry on with the copies built into the page. */
+  function attempt(){
+    tries++;
+    var tag = document.createElement('script');
+    tag.src = CONFIG_URL + '?config=1&callback=rowSettings&t=' + Date.now();
+    tag.onerror = function(){ if (tries < 2) attempt(); else finish(); };
+    document.head.appendChild(tag);
+    setTimeout(function(){
+      if (finished || SETTINGS_OK) return;
+      if (tries < 2) attempt(); else finish();
+    }, 4000);
+  }
+  attempt();
 }
 
 loadSettings(function(){ startForm(); });
@@ -554,6 +576,17 @@ function startForm(){
     var list   = SCHEDULES[group];
 
     if (!list || list.length < 2) {
+      /* If the settings never loaded we cannot tell whether this group
+         has several times or none, so say so rather than quietly skip it. */
+      if (!SETTINGS_OK && slot === 1 && group) {
+        document.getElementById('schedQ').textContent = 'We could not load the practice times';
+        document.getElementById('schedWhy').textContent =
+          'Please close this page and open the link again. If it keeps happening, ' +
+          'send your answer anyway and email us the times that suit you.';
+        boxEl.innerHTML = '';
+        stepEl.classList.remove('hidden');
+        return;
+      }
       stepEl.classList.add('hidden');
       boxEl.innerHTML = '';
       return;
@@ -616,6 +649,14 @@ function startForm(){
       err.style.display = 'none';
     }
     if (e.target.name === 'choice2') err.style.display = 'none';
+  });
+
+  document.getElementById('retryBtn').addEventListener('click', function(){
+    document.getElementById('failCard').classList.add('hidden');
+    document.getElementById('formCard').classList.remove('hidden');
+    btn.disabled = false;
+    btn.textContent = 'Send my answer';
+    window.scrollTo(0,0);
   });
 
   /* ---- build the confirmation screen ---- */
@@ -758,12 +799,30 @@ function startForm(){
     btn.disabled = true;
     btn.textContent = 'Sending\u2026';
 
-    setTimeout(function(){
+    /* The answer is posted into a hidden frame. If that frame never
+       finishes loading, the answer did not reach us, so say so rather
+       than showing a thank you that is not true. */
+    var landed = false;
+    var sink = document.getElementsByName('sink')[0];
+
+    function arrived(){
+      if (landed) return;
+      landed = true;
       buildDone(ret.value, form.querySelector('input[name="choice1"]:checked'), ticked);
       document.getElementById('formCard').classList.add('hidden');
       document.getElementById('doneCard').classList.remove('hidden');
       window.scrollTo(0,0);
-    }, 700);
+    }
+
+    if (sink) sink.addEventListener('load', function(){ setTimeout(arrived, 300); });
+
+    setTimeout(function(){
+      if (landed) return;
+      landed = true;
+      document.getElementById('formCard').classList.add('hidden');
+      document.getElementById('failCard').classList.remove('hidden');
+      window.scrollTo(0,0);
+    }, 12000);
   });
 }
 </script>
