@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- ROW group confirmation form. VERSION 2026-08-17 E. Confirms every answer before saying thank you. -->
+<!-- ROW group confirmation form. VERSION 2026-08-17 F. Confirms every answer before saying thank you. -->
 <html lang="en-CA">
 <head>
 <meta charset="utf-8">
@@ -103,6 +103,7 @@
   button.send[disabled]{background:var(--slate);cursor:default;}
 
   .err{color:#A32020;font-weight:600;font-size:15px;margin-top:12px;display:none;}
+  .wait{color:var(--slate);font-size:15px;margin:12px 0 0;text-align:center;}
   .foot{margin:22px 4px 0;font-size:14px;color:var(--slate);}
   .foot a{color:var(--deep);}
   /* ---- confirmation screen ---- */
@@ -179,7 +180,7 @@
     <a href="?t=g80d4e6d&amp;n=Greyson%20M.&amp;g1=Assessment">Assessment</a>
   </div>
 
-  <p class="club">ROW Swim Club<span id="ver" style="float:right;font-weight:400;letter-spacing:0;text-transform:none;color:#B7C6CD;font-size:10px">v2026-08-17E</span></p>
+  <p class="club">ROW Swim Club<span id="ver" style="float:right;font-weight:400;letter-spacing:0;text-transform:none;color:#B7C6CD;font-size:10px">v2026-08-17F</span></p>
   <div class="rope" aria-hidden="true"></div>
 
   <!-- ============ FORM ============ -->
@@ -258,6 +259,7 @@
       </div>
 
       <button type="submit" class="send" id="sendBtn">Send my answer</button>
+      <p class="wait hidden" id="wait">Still saving. This can take a few seconds, so please wait.</p>
       <p class="err" id="err"></p>
     </form>
   </div>
@@ -665,6 +667,7 @@ function startForm(){
     document.getElementById('formCard').classList.remove('hidden');
     btn.disabled = false;
     btn.textContent = 'Send my answer';
+    document.getElementById('wait').classList.add('hidden');
     window.scrollTo(0,0);
   });
 
@@ -807,6 +810,8 @@ function startForm(){
     err.style.display = 'none';
     btn.disabled = true;
     btn.textContent = 'Sending\u2026';
+    var waitMsg = document.getElementById('wait');
+    var waitTimer = setTimeout(function(){ waitMsg.classList.remove('hidden'); }, 2000);
 
     /* Send it in a way we get a straight answer back from. A normal form
        send tells us nothing, because a blocked send looks the same as a
@@ -833,6 +838,8 @@ function startForm(){
     window.rowSaved = function(res){
       if (landed) return;
       landed = true;
+      clearTimeout(waitTimer);
+      waitMsg.classList.add('hidden');
       if (res && res.saved) {
         buildDone(ret.value, form.querySelector('input[name="choice1"]:checked'), ticked);
         document.getElementById('formCard').classList.add('hidden');
@@ -857,6 +864,8 @@ function startForm(){
         if (landed) return;
         if (attempts < 2) { send(); return; }
         landed = true;
+        clearTimeout(waitTimer);
+        waitMsg.classList.add('hidden');
         document.getElementById('formCard').classList.add('hidden');
         document.getElementById('failCard').classList.remove('hidden');
         window.scrollTo(0,0);
