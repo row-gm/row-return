@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- ROW group confirmation form. VERSION 2026-08-18 D. Confirms every answer before saying thank you. -->
+<!-- ROW group confirmation form. VERSION 2026-08-18 E. Confirms every answer before saying thank you. -->
 <html lang="en-CA">
 <head>
 <meta charset="utf-8">
@@ -166,11 +166,6 @@
 <body>
 <div class="wrap">
 
-  <div class="pv hidden" id="blockBar" style="background:#FDECEC;border-color:#E2A1A1">
-    <p style="color:#8A2222">Your email app is blocking part of this page, so your answer may not save.</p>
-    <p style="color:#8A2222;font-weight:400;margin:0">Please copy the address at the top of this page and open it in Chrome or Safari instead. If that is difficult, email <a href="mailto:gm@rowswimming.ca">gm@rowswimming.ca</a> and we will record your answer for you.</p>
-  </div>
-
   <div class="pv hidden" id="previewBar">
     <p>Preview mode. You are opening this file from your computer, so no answers are saved.</p>
     <a href="?t=g7543d87&amp;n=Parnia%20A.&amp;g1=Senior%20Development%20%28SD%29">One group</a>
@@ -180,7 +175,7 @@
     <a href="?t=g80d4e6d&amp;n=Greyson%20M.&amp;g1=Assessment">Assessment</a>
   </div>
 
-  <p class="club">ROW Swim Club<span id="ver" style="float:right;font-weight:400;letter-spacing:0;text-transform:none;color:#B7C6CD;font-size:10px">v2026-08-18D</span></p>
+  <p class="club">ROW Swim Club<span id="ver" style="float:right;font-weight:400;letter-spacing:0;text-transform:none;color:#B7C6CD;font-size:10px">v2026-08-18E</span></p>
   <div class="rope" aria-hidden="true"></div>
 
   <!-- ============ FORM ============ -->
@@ -343,20 +338,20 @@
 var DEFAULT_PAGES = {
   "Age Group Development 1 (AGD1)": "https://www.rowswimming.ca/page/programs/age-group-development-1",
   "Age Group Development 2 (AGD2)": "https://www.rowswimming.ca/page/programs/age-group-development-2",
+  "Assessment": "https://www.rowswimming.ca/page/system/teamreg-shopping?eventId=1761153",
   "Junior Development 1 (JD1)": "https://www.rowswimming.ca/page/programs/junior-development-1",
   "Junior Development 2 (JD2)": "https://www.rowswimming.ca/page/programs/junior-development-2",
-  "Senior Development (SD)": "https://www.rowswimming.ca/page/programs/senior-development",
+  "National Development (ND)": "https://www.rowswimming.ca/page/programs/national-development",
   "Provincial Development 1 (PD1)": "https://www.rowswimming.ca/page/programs/provincial-development-1",
   "Provincial Development 2 (PD2)": "https://www.rowswimming.ca/page/programs/provincial-development-2",
   "Provincial Development 3 (PD3)": "https://www.rowswimming.ca/page/programs/provincial-development-3",
-  "National Development (ND)": "https://www.rowswimming.ca/page/programs/national-development",
+  "ROW Swim Academy - Advanced": "https://www.rowswimming.ca/page/programs/row-swim-academy",
   "ROW Swim Academy - Beginner": "https://www.rowswimming.ca/page/programs/row-swim-academy",
   "ROW Swim Academy - Intermediate": "https://www.rowswimming.ca/page/programs/row-swim-academy",
-  "ROW Swim Academy - Advanced": "https://www.rowswimming.ca/page/programs/row-swim-academy",
-  "TOPS 1": "https://www.rowswimming.ca/page/programs/tops-1",
-  "TOPS 2": "https://www.rowswimming.ca/page/programs/tops-2",
   "Recreation": "https://www.rowswimming.ca/page/programs/recreation-groups",
-  "Assessment": "https://www.rowswimming.ca/page/system/teamreg-shopping?eventId=1761153"
+  "Senior Development (SD)": "https://www.rowswimming.ca/page/programs/senior-development",
+  "TOPS 1": "https://www.rowswimming.ca/page/programs/tops-1",
+  "TOPS 2": "https://www.rowswimming.ca/page/programs/tops-2"
 };
 
 /* =====================================================================
@@ -389,16 +384,31 @@ var DEFAULT_SCHEDULES = {
     "Monday, Wednesday and Friday, 7:00 to 8:00 pm at Cameron Heights",
     "Tuesday 7:00 to 8:00 pm, Wednesday 6:00 to 7:00 pm, Thursday 5:30 to 6:30 pm at WLU"
   ],
+  "ROW Swim Academy - Beginner": [
+    "Saturday - 7:45-8:25 am",
+    "Saturday - 8:30-9:10 am",
+    "Saturday - 9:15-9:55 am"
+  ],
   "TOPS 2": [
     "Monday and Wednesday, 7:00 to 8:00 pm at Cameron Heights",
     "Wednesday and Friday, 7:00 to 8:00 pm at Cameron Heights",
     "Monday and Friday, 7:00 to 8:00 pm at Cameron Heights",
-    "Tuesday and Thursday, 5:30 to 6:30 pm at WLU",
-    "Tuesday 7:30 to 8:30 pm and Thursday 7:00 to 8:00 pm at WLU"
+    "Tuesday and Thursday, 5:30 to 6:30 pm at WLU (New)",
+    "Tuesday 7:30 to 8:30 pm and Thursday 7:00 to 8:00 pm at WLU (New)"
+  ],
+  "ROW Swim Academy - Intermediate": [
+    "Saturday - 7:45-8:25 am",
+    "Saturday - 8:30-9:10 am",
+    "Saturday - 9:15-9:55 am"
   ],
   "Recreation": [
     "Monday, Wednesday and Friday, 8:00 to 9:00 pm at Cameron Heights",
     "Monday, Wednesday and Friday, 6:00 to 7:30 am at the Rec Centre"
+  ],
+  "ROW Swim Academy - Advanced": [
+    "Saturday - 7:45-8:25 am",
+    "Saturday - 8:30-9:10 am",
+    "Saturday - 9:15-9:55 am"
   ]
 };
 
@@ -421,57 +431,38 @@ var CONFIG_URL = document.getElementById('replyForm').getAttribute('action');
  * way. If nothing comes back within a few seconds, the copies built into
  * this page are used instead and the form carries on as normal.
  */
-var SETTINGS_OK = false;
-var SETTINGS_DONE = false;
+/* =====================================================================
+   SETTINGS
+   The times above are the ones in use, written into this page. The form
+   draws itself from them straight away, so there is never any waiting
+   and never a moment where the times are missing.
+   The spreadsheet is then asked quietly in the background, only so a
+   change made there appears without this file being touched. If that
+   takes a while, or never answers, nobody notices.
+   ===================================================================== */
+var PROGRAM_PAGES = DEFAULT_PAGES;
+var SCHEDULES = DEFAULT_SCHEDULES;
 
-/**
- * Asks the spreadsheet for the current program links and practice times.
- *
- * The reply usually takes a few seconds and can take longer on a phone,
- * so this waits properly before giving up. If it turns up late, the page
- * quietly puts the times in and clears the warning.
- */
-function loadSettings(done){
-  var finished = false;
+var CONFIG_URL = document.getElementById('replyForm').getAttribute('action');
 
-  function finish(){
-    if (finished) return;
-    finished = true;
-    done();
-  }
-
-  window.rowSettings = function(cfg){
-    try {
-      if (cfg && cfg.pages && Object.keys(cfg.pages).length) PROGRAM_PAGES = cfg.pages;
-      if (cfg && cfg.schedules) { SCHEDULES = cfg.schedules; SETTINGS_OK = true; }
-    } catch (e) { /* keep the built in copies */ }
-
-    if (finished) { settingsArrivedLate(); return; }
-    finish();
-  };
-
-  var tag = document.createElement('script');
-  tag.src = CONFIG_URL + '?config=1&callback=rowSettings&t=' + Date.now();
-  tag.onerror = function(){ finish(); };
-  document.head.appendChild(tag);
-
-  /* Generous, because a slow reply is not a failure. */
-  setTimeout(finish, 20000);
-}
-
-/* Called if the times turn up after the page has already drawn itself. */
-function settingsArrivedLate(){
+window.rowSettings = function(cfg){
   try {
-    var bar = document.getElementById('blockBar');
-    if (bar) bar.classList.add('hidden');
+    if (cfg && cfg.pages && Object.keys(cfg.pages).length) PROGRAM_PAGES = cfg.pages;
+    if (cfg && cfg.schedules && Object.keys(cfg.schedules).length) SCHEDULES = cfg.schedules;
     if (typeof window.rowRefreshTimes === 'function') window.rowRefreshTimes();
+  } catch (e) { /* the built in times are already showing */ }
+};
+
+function askForSettings(){
+  try {
+    var tag = document.createElement('script');
+    tag.src = CONFIG_URL + '?config=1&callback=rowSettings&t=' + Date.now();
+    document.head.appendChild(tag);
   } catch (e) {}
 }
 
-loadSettings(function(){
-  if (!SETTINGS_OK) document.getElementById('blockBar').classList.remove('hidden');
-  startForm();
-});
+startForm();
+askForSettings();
 
 function startForm(){
   var p = new URLSearchParams(window.location.search);
@@ -603,15 +594,6 @@ function startForm(){
     if (!list || list.length < 2) {
       /* If the settings never loaded we cannot tell whether this group
          has several times or none, so say so rather than quietly skip it. */
-      if (!SETTINGS_OK && slot === 1 && group) {
-        document.getElementById('schedQ').textContent = 'We could not load the practice times';
-        document.getElementById('schedWhy').textContent =
-          'You can still send your answer. We will be in touch about times, ' +
-          'or you can email us at gm@rowswimming.ca with the times that suit you.';
-        boxEl.innerHTML = '';
-        stepEl.classList.remove('hidden');
-        return;
-      }
       stepEl.classList.add('hidden');
       boxEl.innerHTML = '';
       return;
