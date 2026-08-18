@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- ROW group confirmation form. VERSION 2026-08-17 D. Confirms every answer before saying thank you. -->
+<!-- ROW group confirmation form. VERSION 2026-08-18 A. Confirms every answer before saying thank you. -->
 <html lang="en-CA">
 <head>
 <meta charset="utf-8">
@@ -103,6 +103,7 @@
   button.send[disabled]{background:var(--slate);cursor:default;}
 
   .err{color:#A32020;font-weight:600;font-size:15px;margin-top:12px;display:none;}
+  .wait{color:var(--slate);font-size:15px;margin:12px 0 0;text-align:center;}
   .foot{margin:22px 4px 0;font-size:14px;color:var(--slate);}
   .foot a{color:var(--deep);}
   /* ---- confirmation screen ---- */
@@ -179,7 +180,7 @@
     <a href="?t=g80d4e6d&amp;n=Greyson%20M.&amp;g1=Assessment">Assessment</a>
   </div>
 
-  <p class="club">ROW Swim Club<span id="ver" style="float:right;font-weight:400;letter-spacing:0;text-transform:none;color:#B7C6CD;font-size:10px">v2026-08-17D</span></p>
+  <p class="club">ROW Swim Club<span id="ver" style="float:right;font-weight:400;letter-spacing:0;text-transform:none;color:#B7C6CD;font-size:10px">v2026-08-18A</span></p>
   <div class="rope" aria-hidden="true"></div>
 
   <!-- ============ FORM ============ -->
@@ -258,6 +259,7 @@
       </div>
 
       <button type="submit" class="send" id="sendBtn">Send my answer</button>
+      <p class="wait hidden" id="wait">Still saving. This can take a few seconds, so please wait.</p>
       <p class="err" id="err"></p>
     </form>
   </div>
@@ -306,15 +308,18 @@
 
   <!-- ============ BAD LINK ============ -->
   <div class="card hidden" id="failCard">
-    <h1>We could not save your answer</h1>
-    <p class="sub">Your phone or email app blocked it. Nothing has been recorded, so please try one of these.</p>
+    <h1>Not saved yet</h1>
+    <p class="sub" id="failWhy">Your email app blocked the usual way of sending. Nothing has been lost, and the button below almost always works.</p>
+
+    <button type="button" class="send" id="otherWayBtn" style="margin-top:20px">Send it another way</button>
+
     <div class="step">
-      <p class="q" style="font-size:16px">Open the link in a normal browser</p>
-      <p class="why">Copy the address at the top of this page, then paste it into Chrome or Safari and answer again. This fixes it almost every time.</p>
-      <p class="q" style="font-size:16px">Or just email us</p>
-      <p class="why">Send your answer to <a href="mailto:gm@rowswimming.ca">gm@rowswimming.ca</a> and we will record it for you.</p>
+      <p class="q" style="font-size:16px">Still stuck?</p>
+      <p class="why">Copy the address at the top of this page into Chrome or Safari and answer there. Or email <a href="mailto:gm@rowswimming.ca">gm@rowswimming.ca</a> and we will record your answer for you.</p>
     </div>
-    <button type="button" class="send" id="retryBtn">Try again</button>
+
+    <button type="button" class="send" id="retryBtn"
+            style="background:transparent;color:var(--deep);border:2px solid var(--line);margin-top:4px">Go back and check my answers</button>
   </div>
 
   <div class="card hidden" id="badCard">
@@ -660,11 +665,23 @@ function startForm(){
     if (e.target.name === 'choice2') err.style.display = 'none';
   });
 
+  /* The way that works everywhere. Going to an address is just following
+     a link, and no email app blocks that. The club's script saves the
+     answer and shows its own thank you page. */
+  var lastPayload = null;
+  document.getElementById('otherWayBtn').addEventListener('click', function(){
+    if (!lastPayload) return;
+    var q = [];
+    for (var k in lastPayload) q.push(k + '=' + encodeURIComponent(lastPayload[k]));
+    window.location.href = CONFIG_URL + '?' + q.join('&');
+  });
+
   document.getElementById('retryBtn').addEventListener('click', function(){
     document.getElementById('failCard').classList.add('hidden');
     document.getElementById('formCard').classList.remove('hidden');
     btn.disabled = false;
     btn.textContent = 'Send my answer';
+    document.getElementById('wait').classList.add('hidden');
     window.scrollTo(0,0);
   });
 
@@ -807,6 +824,8 @@ function startForm(){
     err.style.display = 'none';
     btn.disabled = true;
     btn.textContent = 'Sending\u2026';
+    var waitMsg = document.getElementById('wait');
+    var waitTimer = setTimeout(function(){ waitMsg.classList.remove('hidden'); }, 2000);
 
     /* Send it in a way we get a straight answer back from. A normal form
        send tells us nothing, because a blocked send looks the same as a
@@ -817,7 +836,7 @@ function startForm(){
     var landed = false;
     var attempts = 0;
 
-    var payload = {
+    var payload = lastPayload = {
       submit: '1',
       token: form.token.value,
       swimmer: form.swimmer.value,
@@ -833,11 +852,22 @@ function startForm(){
     window.rowSaved = function(res){
       if (landed) return;
       landed = true;
+      clearTimeout(waitTimer);
+      waitMsg.classList.add('hidden');
       if (res && res.saved) {
         buildDone(ret.value, form.querySelector('input[name="choice1"]:checked'), ticked);
         document.getElementById('formCard').classList.add('hidden');
         document.getElementById('doneCard').classList.remove('hidden');
       } else {
+        var why = (res && res.message) || '';
+        var note = document.getElementById('failWhy');
+        if (why === 'Busy') {
+          note.textContent = 'Several families answered at the same moment, so ours was not saved. ' +
+                             'Nothing has been lost. Please try the button below.';
+        } else if (why === 'Unknown code') {
+          note.textContent = 'We do not recognise this link. Please email gm@rowswimming.ca and we will sort it out.';
+          document.getElementById('otherWayBtn').classList.add('hidden');
+        }
         document.getElementById('formCard').classList.add('hidden');
         document.getElementById('failCard').classList.remove('hidden');
       }
@@ -850,17 +880,20 @@ function startForm(){
       for (var k in payload) q.push(k + '=' + encodeURIComponent(payload[k]));
       var tag = document.createElement('script');
       tag.src = CONFIG_URL + '?' + q.join('&') + '&z=' + Date.now();
-      tag.onerror = function(){ if (attempts < 2) send(); };
+      tag.onerror = function(){ if (!landed && attempts < 2) send(); };
       document.head.appendChild(tag);
 
+      /* Saving can take a while on a busy day, so wait properly before
+         giving up. Trying again halfway only makes it slower. */
       setTimeout(function(){
         if (landed) return;
-        if (attempts < 2) { send(); return; }
         landed = true;
+        clearTimeout(waitTimer);
+        waitMsg.classList.add('hidden');
         document.getElementById('formCard').classList.add('hidden');
         document.getElementById('failCard').classList.remove('hidden');
         window.scrollTo(0,0);
-      }, 9000);
+      }, 30000);
     }
     send();
   });
