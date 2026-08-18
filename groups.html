@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- ROW group confirmation form. VERSION 2026-08-18 B. Confirms every answer before saying thank you. -->
+<!-- ROW group confirmation form. VERSION 2026-08-18 D. Confirms every answer before saying thank you. -->
 <html lang="en-CA">
 <head>
 <meta charset="utf-8">
@@ -180,7 +180,7 @@
     <a href="?t=g80d4e6d&amp;n=Greyson%20M.&amp;g1=Assessment">Assessment</a>
   </div>
 
-  <p class="club">ROW Swim Club<span id="ver" style="float:right;font-weight:400;letter-spacing:0;text-transform:none;color:#B7C6CD;font-size:10px">v2026-08-18B</span></p>
+  <p class="club">ROW Swim Club<span id="ver" style="float:right;font-weight:400;letter-spacing:0;text-transform:none;color:#B7C6CD;font-size:10px">v2026-08-18D</span></p>
   <div class="rope" aria-hidden="true"></div>
 
   <!-- ============ FORM ============ -->
@@ -422,10 +422,17 @@ var CONFIG_URL = document.getElementById('replyForm').getAttribute('action');
  * this page are used instead and the form carries on as normal.
  */
 var SETTINGS_OK = false;
+var SETTINGS_DONE = false;
 
+/**
+ * Asks the spreadsheet for the current program links and practice times.
+ *
+ * The reply usually takes a few seconds and can take longer on a phone,
+ * so this waits properly before giving up. If it turns up late, the page
+ * quietly puts the times in and clears the warning.
+ */
 function loadSettings(done){
   var finished = false;
-  var tries = 0;
 
   function finish(){
     if (finished) return;
@@ -438,23 +445,27 @@ function loadSettings(done){
       if (cfg && cfg.pages && Object.keys(cfg.pages).length) PROGRAM_PAGES = cfg.pages;
       if (cfg && cfg.schedules) { SCHEDULES = cfg.schedules; SETTINGS_OK = true; }
     } catch (e) { /* keep the built in copies */ }
+
+    if (finished) { settingsArrivedLate(); return; }
     finish();
   };
 
-  /* Some phone email apps open links in a cut down browser that blocks
-     this. Try twice, then carry on with the copies built into the page. */
-  function attempt(){
-    tries++;
-    var tag = document.createElement('script');
-    tag.src = CONFIG_URL + '?config=1&callback=rowSettings&t=' + Date.now();
-    tag.onerror = function(){ if (tries < 2) attempt(); else finish(); };
-    document.head.appendChild(tag);
-    setTimeout(function(){
-      if (finished || SETTINGS_OK) return;
-      if (tries < 2) attempt(); else finish();
-    }, 4000);
-  }
-  attempt();
+  var tag = document.createElement('script');
+  tag.src = CONFIG_URL + '?config=1&callback=rowSettings&t=' + Date.now();
+  tag.onerror = function(){ finish(); };
+  document.head.appendChild(tag);
+
+  /* Generous, because a slow reply is not a failure. */
+  setTimeout(finish, 20000);
+}
+
+/* Called if the times turn up after the page has already drawn itself. */
+function settingsArrivedLate(){
+  try {
+    var bar = document.getElementById('blockBar');
+    if (bar) bar.classList.add('hidden');
+    if (typeof window.rowRefreshTimes === 'function') window.rowRefreshTimes();
+  } catch (e) {}
 }
 
 loadSettings(function(){
@@ -626,6 +637,14 @@ function startForm(){
     boxEl.innerHTML = h;
     stepEl.classList.remove('hidden');
   }
+
+  /* So a late reply can put the times in without the family reloading. */
+  window.rowRefreshTimes = function(){
+    var c1 = form.querySelector('input[name="choice1"]:checked');
+    var c2 = form.querySelector('input[name="choice2"]:checked');
+    showSchedules(c1 && c1.value !== 'Would like to discuss' ? c1.value : '', 1);
+    showSchedules(c2 && c2.value !== 'No second choice' ? c2.value : '', 2);
+  };
 
   form.addEventListener('change', function(e){
     if (e.target.name === 'returning') {
