@@ -414,25 +414,6 @@ var DEFAULT_SCHEDULES = {
 
 /* =====================================================================
    SETTINGS
-   The page asks the spreadsheet for the current program links and
-   schedules when it loads. If that does not answer within a few seconds,
-   it uses the copies above instead, so the form always works.
-   ===================================================================== */
-var PROGRAM_PAGES = DEFAULT_PAGES;
-var SCHEDULES = DEFAULT_SCHEDULES;
-
-var CONFIG_URL = document.getElementById('replyForm').getAttribute('action');
-
-/**
- * Asks the spreadsheet for the current program links and schedules.
- *
- * It loads the answer as a script rather than fetching it, because
- * browsers will not let a page read a Google Apps Script reply any other
- * way. If nothing comes back within a few seconds, the copies built into
- * this page are used instead and the form carries on as normal.
- */
-/* =====================================================================
-   SETTINGS
    The times above are the ones in use, written into this page. The form
    draws itself from them straight away, so there is never any waiting
    and never a moment where the times are missing.
