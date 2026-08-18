@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- ROW group confirmation form. VERSION 2026-08-17 D. Confirms every answer before saying thank you. -->
+<!-- ROW group confirmation form. VERSION 2026-08-17 E. Confirms every answer before saying thank you. -->
 <html lang="en-CA">
 <head>
 <meta charset="utf-8">
@@ -179,7 +179,7 @@
     <a href="?t=g80d4e6d&amp;n=Greyson%20M.&amp;g1=Assessment">Assessment</a>
   </div>
 
-  <p class="club">ROW Swim Club<span id="ver" style="float:right;font-weight:400;letter-spacing:0;text-transform:none;color:#B7C6CD;font-size:10px">v2026-08-17D</span></p>
+  <p class="club">ROW Swim Club<span id="ver" style="float:right;font-weight:400;letter-spacing:0;text-transform:none;color:#B7C6CD;font-size:10px">v2026-08-17E</span></p>
   <div class="rope" aria-hidden="true"></div>
 
   <!-- ============ FORM ============ -->
@@ -850,7 +850,7 @@ function startForm(){
       for (var k in payload) q.push(k + '=' + encodeURIComponent(payload[k]));
       var tag = document.createElement('script');
       tag.src = CONFIG_URL + '?' + q.join('&') + '&z=' + Date.now();
-      tag.onerror = function(){ if (attempts < 2) send(); };
+      tag.onerror = function(){ if (!landed && attempts < 2) send(); };
       document.head.appendChild(tag);
 
       setTimeout(function(){
